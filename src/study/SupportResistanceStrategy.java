@@ -12,7 +12,7 @@ import com.motivewave.platform.sdk.study.StudyHeader;
         namespace = "com.cloudvisionltd",
         id = "TITLE_SUPPORT_RESISTANCE_STRATEGY",
         name = "Support & Resistance Strategy",
-        desc = "Catch BIG Volume",
+        desc = "Strategy with support & resistance",
         menu = "A4Crypto Indicators",
         overlay = true,
         signals = true,
