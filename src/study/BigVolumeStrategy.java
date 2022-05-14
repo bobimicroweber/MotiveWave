@@ -23,16 +23,15 @@ import com.motivewave.platform.sdk.study.StudyHeader;
         supportsRealizedPL = true,
         supportsTotalPL = true)
 
-public class BigVolumeStrategy extends VolumePriceTrend {
+public class BigVolumeStrategy extends Study {
 
     @Override
     public void onActivate(OrderContext ctx) {
         if (getSettings().isEnterOnActivate()) {
 
             DataSeries series = ctx.getDataContext().getDataSeries();
-           // int ind=series.isLastBarComplete() ? series.size() - 1 : series.size() - 2;
-            //System.out.println(ind);
-
+            int ind=series.isLastBarComplete() ? series.size() - 1 : series.size() - 2;
+            System.out.println(ind);
 
 
 
