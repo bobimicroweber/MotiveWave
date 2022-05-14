@@ -61,7 +61,7 @@ public class SupportResistance extends Study
     
     // Quick Settings (Tool Bar and Popup Editor)
     sd.addQuickSettings(Inputs.INPUT);
-    sd.addQuickSettings(new SliderDescriptor(Inputs.PERIOD, get("LBL_PERIOD"), 20, 1, 9999, true, () -> Enums.Icon.SINE_WAVE.get()));
+    //sd.addQuickSettings(new SliderDescriptor(Inputs.PERIOD, get("LBL_PERIOD"), 20, 1, 9999, true, () -> Enums.Icon.SINE_WAVE.get()));
     sd.addQuickSettings(Inputs.TOP_PATH, Inputs.BOTTOM_PATH);
 
     var desc = createRD();
