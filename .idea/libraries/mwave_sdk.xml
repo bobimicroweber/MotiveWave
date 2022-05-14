@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="mwave_sdk">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/mwave_sdk.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

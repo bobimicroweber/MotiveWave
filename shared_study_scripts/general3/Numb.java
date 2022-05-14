@@ -1,0 +1,1 @@
+package com.motivewave.platform.study.general3;/** Utility */public class Numb{  public static int DATE = 0;  public static int TIME = 1;  public static int DATE_TIME = 2;  public static int CLOSED = 0;}
