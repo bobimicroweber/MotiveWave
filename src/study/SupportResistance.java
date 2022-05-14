@@ -39,9 +39,11 @@ public class SupportResistance extends Study
     var sd = createSD();
     var tab = sd.addTab(get("TAB_GENERAL"));
 
+    var defaultLblPeriod = 30;
+
     var inputs = tab.addGroup(get("LBL_INPUTS"));
     inputs.addRow(new InputDescriptor(Inputs.INPUT, get("LBL_INPUT"), Enums.BarInput.CLOSE));
-    inputs.addRow(new IntegerDescriptor(Inputs.PERIOD, get("LBL_PERIOD"), 20, 1, 9999, 1));
+    inputs.addRow(new IntegerDescriptor(Inputs.PERIOD, get("LBL_PERIOD"), defaultLblPeriod, 1, 9999, 1));
 
     var markers = tab.addGroup(get("LBL_MARKERS"));
     markers.addRow(new MarkerDescriptor(Inputs.UP_MARKER, get("LBL_UP_MARKER"), 
@@ -61,7 +63,7 @@ public class SupportResistance extends Study
     
     // Quick Settings (Tool Bar and Popup Editor)
     sd.addQuickSettings(Inputs.INPUT);
-    //sd.addQuickSettings(new SliderDescriptor(Inputs.PERIOD, get("LBL_PERIOD"), 20, 1, 9999, true, () -> Enums.Icon.SINE_WAVE.get()));
+    sd.addQuickSettings(new SliderDescriptor(Inputs.PERIOD, get("LBL_PERIOD"), defaultLblPeriod, 1, 9999, true));
     sd.addQuickSettings(Inputs.TOP_PATH, Inputs.BOTTOM_PATH);
 
     var desc = createRD();
