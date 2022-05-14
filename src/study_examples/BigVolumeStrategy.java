@@ -30,7 +30,7 @@ public class BigVolumeStrategy extends Study
         DataSeries series = ctx.getDataContext().getDataSeries();
 
 
-
+        
 
     }
   }

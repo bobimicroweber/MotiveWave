@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/IndicatorTestProject.iml" filepath="$PROJECT_DIR$/IndicatorTestProject.iml" />
+      <module fileurl="file://$PROJECT_DIR$/MotiveWave.iml" filepath="$PROJECT_DIR$/MotiveWave.iml" />
     </modules>
   </component>
 </project>
