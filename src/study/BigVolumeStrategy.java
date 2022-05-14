@@ -1,6 +1,9 @@
 package study;
 
+import com.motivewave.platform.sdk.common.DataContext;
 import com.motivewave.platform.sdk.common.DataSeries;
+import com.motivewave.platform.sdk.common.Enums;
+import com.motivewave.platform.sdk.common.PathInfo;
 import com.motivewave.platform.sdk.order_mgmt.OrderContext;
 import com.motivewave.platform.sdk.study.Study;
 import com.motivewave.platform.sdk.study.StudyHeader;
@@ -9,8 +12,8 @@ import com.motivewave.platform.sdk.study.StudyHeader;
         namespace = "com.cloudvisionltd",
         id = "BIG_VOLUME_STRATEGY",
         name = "Big Volume Strategy",
-        desc = "Catch big volume",
-        menu = "A4Crypto.com",
+        desc = "Catch BIG Volume",
+        menu = "A4Crypto Indicators",
         overlay = true,
         signals = true,
         strategy = true,
@@ -20,12 +23,15 @@ import com.motivewave.platform.sdk.study.StudyHeader;
         supportsRealizedPL = true,
         supportsTotalPL = true)
 
-public class BigVolumeStrategy extends Study {
+public class BigVolumeStrategy extends VolumePriceTrend {
+
     @Override
     public void onActivate(OrderContext ctx) {
         if (getSettings().isEnterOnActivate()) {
 
             DataSeries series = ctx.getDataContext().getDataSeries();
+           // int ind=series.isLastBarComplete() ? series.size() - 1 : series.size() - 2;
+            //System.out.println(ind);
 
 
 
