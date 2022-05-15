@@ -59,6 +59,9 @@ public class SupportResistanceStrategy extends SupportResistance {
         // Entry order filled
         if (order == entryOrder) {
 
+            double takeProfitPercent = 1;
+            double stopLossPercent = 0.20;
+
             // Its a long position ////////////////////////////////////
             if (order.getAction() == Enums.OrderAction.BUY) {
                 Object ref =  entryOrder.getReferenceID();
@@ -66,12 +69,13 @@ public class SupportResistanceStrategy extends SupportResistance {
                 var orders = new ArrayList<Order>();
 
                // Create Take Profit Orders
-                float takeProfitPercent = 1;
-                float stopLossPercent = 1;
                 float entryPrice = instr.getLastPrice();
 
-                float takeProfitPrice = (entryPrice + (entryPrice / 100) * takeProfitPercent);
-                float stopLossPrice = (entryPrice - (entryPrice / 100) * stopLossPercent);
+                Double takeProfitPriceDouble = (entryPrice + (entryPrice / 100) * takeProfitPercent);
+                float takeProfitPrice = takeProfitPriceDouble.floatValue();
+
+                Double stopLossPriceDouble = (entryPrice - (entryPrice / 100) * stopLossPercent);
+                float stopLossPrice = stopLossPriceDouble.floatValue();
 
                 takeProfitPrice = instr.round(takeProfitPrice);
                 stopLossPrice = instr.round(stopLossPrice);
@@ -100,12 +104,13 @@ public class SupportResistanceStrategy extends SupportResistance {
                 var orders = new ArrayList<Order>();
 
                 // Create Take Profit Orders
-                float takeProfitPercent = 1;
-                float stopLossPercent = 1;
                 float entryPrice = instr.getLastPrice();
 
-                float takeProfitPrice = (entryPrice - (entryPrice / 100) * takeProfitPercent);
-                float stopLossPrice = (entryPrice + (entryPrice / 100) * stopLossPercent);
+                Double takeProfitPriceDouble = (entryPrice - (entryPrice / 100) * takeProfitPercent);
+                float takeProfitPrice = takeProfitPriceDouble.floatValue();
+
+                Double stopLossPriceDouble = (entryPrice + (entryPrice / 100) * stopLossPercent);
+                float stopLossPrice = stopLossPriceDouble.floatValue();
 
                 takeProfitPrice = instr.round(takeProfitPrice);
                 stopLossPrice = instr.round(stopLossPrice);
