@@ -37,10 +37,6 @@ public class SupportResistanceStrategy extends SupportResistance {
             return;
         }
 
-        double targetProfit = 1;
-        double stopLoss = 2;
-        double profit = ctx.getUnrealizedPnL();
-
         if (signal == Signals.CROSS_RESISTANCE) {
             // Long
             info("New position: LONG");
@@ -50,6 +46,7 @@ public class SupportResistanceStrategy extends SupportResistance {
         if (signal == Signals.CROSS_SUPPORT) {
             // Short
             info("New position: Short");
+            createShortPosition(ctx);
         }
     }
 
@@ -61,9 +58,9 @@ public class SupportResistanceStrategy extends SupportResistance {
 
         // Entry order filled
         if (order == entryOrder) {
-            if (order.getAction() == Enums.OrderAction.BUY) {
 
-                // Its a long position
+            // Its a long position ////////////////////////////////////
+            if (order.getAction() == Enums.OrderAction.BUY) {
                 Object ref =  entryOrder.getReferenceID();
 
                 var orders = new ArrayList<Order>();
@@ -94,10 +91,44 @@ public class SupportResistanceStrategy extends SupportResistance {
                 ctx.submitOrders(orders);
                 hasActivePosition = 1;
             }
+
+            // Its a short position ////////////////////////////////////
+            if (order.getAction() == Enums.OrderAction.SELL) {
+                Object ref =  entryOrder.getReferenceID();
+
+                var orders = new ArrayList<Order>();
+
+                // Create Take Profit Orders
+                float takeProfitPercent = 1;
+                float entryPrice = instr.getLastPrice();
+
+                float takeProfitPrice = (entryPrice - (entryPrice / 100) * takeProfitPercent);
+                float stopLossPrice = (entryPrice + (entryPrice / 100) * takeProfitPercent);
+
+                takeProfitPrice = instr.round(takeProfitPrice);
+                stopLossPrice = instr.round(stopLossPrice);
+
+                info("Order details:" + ctx.getAvgEntryPrice());
+                info("ref:" + ref);
+                info("entry price:" + entryPrice);
+                info("take profit price:" + takeProfitPrice);
+                info("stop loss price:" + stopLossPrice);
+
+                takeProfitOrder = ctx.createLimitOrder(ref, Enums.OrderAction.BUY, Enums.TIF.GTC, qty, takeProfitPrice);
+                orders.add(takeProfitOrder);
+
+                // Stop Loss Orders
+                stopLossOrder = ctx.createStopOrder(ref, Enums.OrderAction.BUY, Enums.TIF.GTC, qty, stopLossPrice);
+                orders.add(stopLossOrder);
+
+                ctx.submitOrders(orders);
+                hasActivePosition = 1;
+            }
         }
 
         // Order finished
         if (order == takeProfitOrder || order == stopLossOrder) {
+            info("Position are closed!");
             ctx.cancelOrders();
             hasActivePosition = 0;
         }
@@ -113,26 +144,13 @@ public class SupportResistanceStrategy extends SupportResistance {
 
     }
 
-    private void createShortPosition(OrderContext ctx, float qty)
+    private void createShortPosition(OrderContext ctx)
     {
-       /* var entryOrder = createMktEntry(ctx, isShort(), qty);
-        Object ref = entryOrder != null ? entryOrder.getReferenceID() : null;
+        var instr = ctx.getInstrument();
+        float qty=(getSettings().getTradeLots() * instr.getDefaultQuantityAsFloat());
 
-        var orders = new ArrayList<Order>();
-
-        orders.add(entryOrder);
-
-        Create Take Profit Orders
-        float takeProfitPrice = instr.round(ctx.getAvgEntryPrice() - 100);
-        var takeProfitOrder = ctx.createLimitOrder(instr, ref, Enums.OrderAction.BUY, Enums.TIF.GTC, qty, takeProfitPrice);
-        orders.add(takeProfitOrder);
-
-        // Stop Loss Orders
-        float stopLossPrice = instr.round(ctx.getAvgEntryPrice() + 200);
-        var stopLossOrder = ctx.createLimitOrder(instr, ref, Enums.OrderAction.BUY, Enums.TIF.GTC, qty, stopLossPrice);
-        orders.add(stopLossOrder);
-
-        ctx.submitOrders(orders);*/
+        entryOrder = ctx.createMarketOrder(Enums.OrderAction.SELL, qty);
+        ctx.submitOrders(entryOrder);
     }
 
 }
