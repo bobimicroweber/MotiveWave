@@ -67,10 +67,11 @@ public class SupportResistanceStrategy extends SupportResistance {
 
                // Create Take Profit Orders
                 float takeProfitPercent = 1;
+                float stopLossPercent = 2;
                 float entryPrice = instr.getLastPrice();
 
                 float takeProfitPrice = (entryPrice + (entryPrice / 100) * takeProfitPercent);
-                float stopLossPrice = (entryPrice - (entryPrice / 100) * takeProfitPercent);
+                float stopLossPrice = (entryPrice - (entryPrice / 100) * stopLossPercent);
 
                 takeProfitPrice = instr.round(takeProfitPrice);
                 stopLossPrice = instr.round(stopLossPrice);
@@ -100,10 +101,11 @@ public class SupportResistanceStrategy extends SupportResistance {
 
                 // Create Take Profit Orders
                 float takeProfitPercent = 1;
+                float stopLossPercent = 2;
                 float entryPrice = instr.getLastPrice();
 
                 float takeProfitPrice = (entryPrice - (entryPrice / 100) * takeProfitPercent);
-                float stopLossPrice = (entryPrice + (entryPrice / 100) * takeProfitPercent);
+                float stopLossPrice = (entryPrice + (entryPrice / 100) * stopLossPercent);
 
                 takeProfitPrice = instr.round(takeProfitPrice);
                 stopLossPrice = instr.round(stopLossPrice);
