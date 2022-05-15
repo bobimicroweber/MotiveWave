@@ -44,7 +44,7 @@ public class SuperTrendStrategy extends SuperTrend
   {
     var instr = ctx.getInstrument();
     float position=ctx.getPositionAsFloat();
-    float qty=(getSettings().getTradeLots() * instr.getDefaultQuantityAsFloat());
+    float qty=(getSettings().getTradeLots() *  instr.getDefaultQuantityAsFloat());
 
     qty += Math.abs(position); // Stop and Reverse if there is an open position
     if (position <= 0 && signal == Signals.BUY) {

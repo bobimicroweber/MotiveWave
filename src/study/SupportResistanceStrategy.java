@@ -1,6 +1,10 @@
 package study;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.motivewave.platform.sdk.common.*;
+import com.motivewave.platform.sdk.order_mgmt.Order;
 import com.motivewave.platform.sdk.order_mgmt.OrderContext;
 import com.motivewave.platform.sdk.study.Study;
 import com.motivewave.platform.sdk.study.StudyHeader;
@@ -22,65 +26,113 @@ import com.motivewave.platform.sdk.study.StudyHeader;
 
 public class SupportResistanceStrategy extends SupportResistance {
 
-  @Override
-  public void onActivate(OrderContext ctx)
-  {
-    if (getSettings().isEnterOnActivate()) {
-      DataSeries series=ctx.getDataContext().getDataSeries();
-      int ind=series.isLastBarComplete() ? series.size() - 1 : series.size() - 2;
-      Boolean buy=series.getBoolean(ind, Signals.CROSS_RESISTANCE);//buy
-      Boolean sell=series.getBoolean(ind, Signals.CROSS_SUPPORT);//sell
-      if (buy == null || sell == null) return;
+    private int hasActivePosition = 0;
+    private Order entryOrder, takeProfitOrder, stopLossOrder;
 
-      int tradeLots=getSettings().getTradeLots();
-      float qty=tradeLots*=ctx.getInstrument().getDefaultQuantityAsFloat();
+    @Override
+    public void onSignal(OrderContext ctx, Object signal) {
 
-      switch (getSettings().getPositionType()) {
-        case LONG: // Only Long Positions are allowed.
-          if (buy) ctx.buy(qty);
-          break;
-        case SHORT: // Only Short Positions are allowed.
-          if (sell) ctx.sell(qty);
-          break;
-        default: // Both Long and Short Positions Allowed
-          if (buy) ctx.buy(qty);
-          else ctx.sell(qty);
-      }
-    }
-  }
+        if (hasActivePosition == 1) {
+            info("Already has position");
+            return;
+        }
 
-  @Override
-  public void onSignal(OrderContext ctx, Object signal)
-  {
-    Instrument instr=ctx.getInstrument();
-    float position=ctx.getPositionAsFloat();
-    float qty=(getSettings().getTradeLots() * instr.getDefaultQuantityAsFloat());
+        double targetProfit = 1;
+        double stopLoss = 2;
+        double profit = ctx.getUnrealizedPnL();
 
-    switch (getSettings().getPositionType()) {
-      case LONG: // Only Long Positions are allowed.
-        if (position == 0 && signal == Signals.CROSS_RESISTANCE) {
-          ctx.buy(qty); // Open Long Position
+        if (signal == Signals.CROSS_RESISTANCE) {
+            // Long
+            info("New position: LONG");
+            createLongPosition(ctx);
         }
-        if (position > 0 && signal == Signals.CROSS_SUPPORT) {
-          ctx.sell(qty); // Close Long Position
-        }
-        break;
-      case SHORT: // Only Short Positions are allowed.
-        if (position == 0 && signal == Signals.CROSS_SUPPORT) {
-          ctx.sell(qty); // Open Short Position
-        }
-        if (position < 0 && signal == Signals.CROSS_RESISTANCE) {
-          ctx.buy(qty); // Close Short Position
-        }
-        break;
-      default: // Both Long and Short Positions Allowed
-        qty+=Math.abs(position); // Stop and Reverse if there is an open position
-        if (position <= 0 && signal == Signals.CROSS_RESISTANCE) {
-          ctx.buy(qty); // Open Long Position
-        }
-        if (position >= 0 && signal == Signals.CROSS_SUPPORT) {
-          ctx.sell(qty); // Open Short Position
+
+        if (signal == Signals.CROSS_SUPPORT) {
+            // Short
+            info("New position: Short");
         }
     }
-  }
+
+    @Override
+    public void onOrderFilled(OrderContext ctx, Order order)
+    {
+        var instr = ctx.getInstrument();
+        float qty=(getSettings().getTradeLots() * instr.getDefaultQuantityAsFloat());
+
+        // Entry order filled
+        if (order == entryOrder) {
+            if (order.getAction() == Enums.OrderAction.BUY) {
+
+                // Its a long position
+                Object ref =  entryOrder.getReferenceID();
+
+                var orders = new ArrayList<Order>();
+
+               // Create Take Profit Orders
+                float takeProfitPercent = 1;
+                float entryPrice = instr.getLastPrice();
+
+                float takeProfitPrice = (entryPrice + (entryPrice / 100) * takeProfitPercent);
+                float stopLossPrice = (entryPrice - (entryPrice / 100) * takeProfitPercent);
+
+                takeProfitPrice = instr.round(takeProfitPrice);
+                stopLossPrice = instr.round(stopLossPrice);
+
+                info("Order details:" + ctx.getAvgEntryPrice());
+                info("ref:" + ref);
+                info("entry price:" + entryPrice);
+                info("take profit price:" + takeProfitPrice);
+                info("stop loss price:" + stopLossPrice);
+
+                takeProfitOrder = ctx.createLimitOrder(ref, Enums.OrderAction.SELL, Enums.TIF.GTC, qty, takeProfitPrice);
+                orders.add(takeProfitOrder);
+
+                // Stop Loss Orders
+                stopLossOrder = ctx.createStopOrder(ref, Enums.OrderAction.SELL, Enums.TIF.GTC, qty, stopLossPrice);
+                orders.add(stopLossOrder);
+
+                ctx.submitOrders(orders);
+                hasActivePosition = 1;
+            }
+        }
+
+        // Order finished
+        if (order == takeProfitOrder || order == stopLossOrder) {
+            ctx.cancelOrders();
+            hasActivePosition = 0;
+        }
+    }
+
+    private void createLongPosition(OrderContext ctx)
+    {
+        var instr = ctx.getInstrument();
+        float qty=(getSettings().getTradeLots() * instr.getDefaultQuantityAsFloat());
+
+        entryOrder = ctx.createMarketOrder(Enums.OrderAction.BUY, qty);
+        ctx.submitOrders(entryOrder);
+
+    }
+
+    private void createShortPosition(OrderContext ctx, float qty)
+    {
+       /* var entryOrder = createMktEntry(ctx, isShort(), qty);
+        Object ref = entryOrder != null ? entryOrder.getReferenceID() : null;
+
+        var orders = new ArrayList<Order>();
+
+        orders.add(entryOrder);
+
+        Create Take Profit Orders
+        float takeProfitPrice = instr.round(ctx.getAvgEntryPrice() - 100);
+        var takeProfitOrder = ctx.createLimitOrder(instr, ref, Enums.OrderAction.BUY, Enums.TIF.GTC, qty, takeProfitPrice);
+        orders.add(takeProfitOrder);
+
+        // Stop Loss Orders
+        float stopLossPrice = instr.round(ctx.getAvgEntryPrice() + 200);
+        var stopLossOrder = ctx.createLimitOrder(instr, ref, Enums.OrderAction.BUY, Enums.TIF.GTC, qty, stopLossPrice);
+        orders.add(stopLossOrder);
+
+        ctx.submitOrders(orders);*/
+    }
+
 }
