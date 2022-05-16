@@ -59,8 +59,8 @@ public class SupportResistanceStrategy extends SupportResistance {
         // Entry order filled
         if (order == entryOrder) {
 
-            double takeProfitPercent = 1;
-            double stopLossPercent = 2;
+            double takeProfitPercent = 0.30;
+            double stopLossPercent = 0.60;
 
             // Its a long position ////////////////////////////////////
             if (order.getAction() == Enums.OrderAction.BUY) {
